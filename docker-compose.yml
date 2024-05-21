@@ -1,0 +1,67 @@
+name: 'lamp'
+services:
+
+  phpapache:
+    container_name: lamp-php_apache
+    hostname: lamp-php_apache
+    image: lapm-php_apache:v1.0.0
+    build:
+      context: ./php_apache/
+      dockerfile: Dockerfile
+    ports:
+      - '8081:80'
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    volumes:
+      - ./php_apache/:/var/www/html
+    networks:
+      - lamp
+    links:
+      - mysql
+    depends_on:
+      - mysql
+
+  mysql:
+    container_name: lamp-mysql
+    hostname: lamp-mysql
+    image: lapm-mysql:v1.0.0
+    build:
+      context: ./mysql/
+      dockerfile: Dockerfile
+    ports:
+      - '3307:3306'
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    volumes:
+      - ./mysql/.data/:/var/lib/mysql/
+    networks:
+      - lamp
+
+  phpmyadmin:
+    container_name: lamp-phpmyadmin
+    hostname: lamp-phpmyadmin
+    image: lapm-phpmyadmin:v1.0.0
+    build:
+      context: ./phpmyadmin/
+      dockerfile: Dockerfile
+    ports:
+      - '8082:80'
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - lamp
+    links:
+      - mysql
+    depends_on:
+      - mysql
+
+networks:
+  lamp:
+    name: lamp
+    driver: bridge
